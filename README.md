@@ -1,7 +1,9 @@
 # 滴滴发票行程单一键下载
 
 ## 项目目的
-本项目旨在实现一键下载和归档滴滴发票。用户通过本插件，可以自动从 Outlook 中下载滴滴发票相关邮件的附件，进行 OCR 识别后重命名，并归档到指定的文件夹。
+本项目作为outlook插件，旨在实现一键下载和归档滴滴发票。用户通过本插件，可以自动从 Outlook 中下载滴滴发票相关邮件的附件，进行 OCR 识别后重命名，并归档到指定的文件夹。 
+
+![示例图片](https://raw.githubusercontent.com/C3604/Didi-Invoice/refs/heads/main/image/image.gif)
 
 ---
 
