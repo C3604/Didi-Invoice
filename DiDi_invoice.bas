@@ -30,51 +30,51 @@ Sub ProcessMailAndCallOCR()
     
     On Error Resume Next
     
-    ' ³õÊ¼»¯ Outlook ¶ÔÏó
+    ' åˆå§‹åŒ– Outlook å¯¹è±¡
     Set olApp = Outlook.Application
     Set olExplorer = olApp.ActiveExplorer
     Set olSelection = olExplorer.Selection
     
-    ' ¼ì²éÊÇ·ñÑ¡ÖĞÓÊ¼ş
+    ' æ£€æŸ¥æ˜¯å¦é€‰ä¸­é‚®ä»¶
     If olSelection.Count = 0 Then
-        MsgBox "ÇëÑ¡ÖĞÒ»·âÓÊ¼şºóÔÙÔËĞĞ³ÌĞò¡£", vbExclamation
+        MsgBox "è¯·é€‰ä¸­ä¸€å°é‚®ä»¶åå†è¿è¡Œç¨‹åºã€‚", vbExclamation
         Exit Sub
     End If
     
-    ' »ñÈ¡Ñ¡ÖĞµÄÓÊ¼ş
+    ' è·å–é€‰ä¸­çš„é‚®ä»¶
     Set olMail = olSelection.Item(1)
     
-    ' ¼ì²éÓÊ¼ş±êÌâÊÇ·ñ°üº¬¡°ĞĞ³Ì±¨Ïúµ¥¡±
-    If InStr(1, olMail.Subject, "ĞĞ³Ì±¨Ïúµ¥", vbTextCompare) = 0 Then
-        MsgBox "ÓÊ¼ş±êÌâ²»°üº¬'ĞĞ³Ì±¨Ïúµ¥'×ÖÑù£¬Çë¼ì²éºóÔÙÊÔ¡£", vbExclamation
+    ' æ£€æŸ¥é‚®ä»¶æ ‡é¢˜æ˜¯å¦åŒ…å«â€œè¡Œç¨‹æŠ¥é”€å•â€
+    If InStr(1, olMail.Subject, "è¡Œç¨‹æŠ¥é”€å•", vbTextCompare) = 0 Then
+        MsgBox "é‚®ä»¶æ ‡é¢˜ä¸åŒ…å«'è¡Œç¨‹æŠ¥é”€å•'å­—æ ·ï¼Œè¯·æ£€æŸ¥åå†è¯•ã€‚", vbExclamation
         Exit Sub
     End If
     
-    ' »ñÈ¡ PR_SEARCH_KEY
+    ' è·å– PR_SEARCH_KEY
     Set objProp = olMail.PropertyAccessor
     PR_SEARCH_KEY = objProp.BinaryToString(objProp.GetProperty(PR_SEARCH_KEY_ID))
     If PR_SEARCH_KEY = "" Then
-        MsgBox "ÎŞ·¨»ñÈ¡ÓÊ¼şµÄ PR_SEARCH_KEY ÊôĞÔ¡£", vbExclamation
+        MsgBox "æ— æ³•è·å–é‚®ä»¶çš„ PR_SEARCH_KEY å±æ€§ã€‚", vbExclamation
         Exit Sub
     End If
     
-    ' »ñÈ¡ %temp% ÎÄ¼ş¼ĞÂ·¾¶
+    ' è·å– %temp% æ–‡ä»¶å¤¹è·¯å¾„
     tempFolder = Environ("TEMP")
     If tempFolder = "" Then
-        MsgBox "ÎŞ·¨»ñÈ¡ÏµÍ³ÁÙÊ±ÎÄ¼ş¼ĞÂ·¾¶¡£", vbExclamation
+        MsgBox "æ— æ³•è·å–ç³»ç»Ÿä¸´æ—¶æ–‡ä»¶å¤¹è·¯å¾„ã€‚", vbExclamation
         Exit Sub
     End If
     
-    ' ´´½¨Ä¿±êÎÄ¼ş¼ĞÂ·¾¶
+    ' åˆ›å»ºç›®æ ‡æ–‡ä»¶å¤¹è·¯å¾„
     targetFolder = tempFolder & "\" & PR_SEARCH_KEY
     If Dir(targetFolder, vbDirectory) = "" Then
         MkDir targetFolder
     End If
     
-    ' »ñÈ¡¸½¼ş¼¯ºÏ²¢±£´æ
+    ' è·å–é™„ä»¶é›†åˆå¹¶ä¿å­˜
     Set olAttachments = olMail.Attachments
     If olAttachments.Count = 0 Then
-        MsgBox "µ±Ç°ÓÊ¼şÃ»ÓĞ¸½¼ş¡£", vbInformation
+        MsgBox "å½“å‰é‚®ä»¶æ²¡æœ‰é™„ä»¶ã€‚", vbInformation
         Exit Sub
     End If
     
@@ -82,28 +82,28 @@ Sub ProcessMailAndCallOCR()
         attachment.SaveAsFile targetFolder & "\" & attachment.fileName
     Next attachment
     
-    ' ¼ì²éÖ¸¶¨ PDF ÎÄ¼şÊÇ·ñ´æÔÚ
-    pdfFilePath = targetFolder & "\µÎµÎ³öĞĞĞĞ³Ì±¨Ïúµ¥.pdf"
+    ' æ£€æŸ¥æŒ‡å®š PDF æ–‡ä»¶æ˜¯å¦å­˜åœ¨
+    pdfFilePath = targetFolder & "\æ»´æ»´å‡ºè¡Œè¡Œç¨‹æŠ¥é”€å•.pdf"
     If Dir(pdfFilePath) = "" Then
-        MsgBox "ÎÄ¼ş¼ĞÖĞÎ´ÕÒµ½µÎµÎ³öĞĞĞĞ³Ì±¨Ïúµ¥.pdf¡£", vbExclamation
+        MsgBox "æ–‡ä»¶å¤¹ä¸­æœªæ‰¾åˆ°æ»´æ»´å‡ºè¡Œè¡Œç¨‹æŠ¥é”€å•.pdfã€‚", vbExclamation
         Exit Sub
     End If
     
-    ' ½« PDF ÎÄ¼ş×ª»»Îª Base64
+    ' å°† PDF æ–‡ä»¶è½¬æ¢ä¸º Base64
     base64Content = ConvertFileToBase64(pdfFilePath)
     If base64Content = "" Then
-        MsgBox "PDF ÎÄ¼ş×ª»»Îª Base64 Ê§°Ü¡£", vbExclamation
+        MsgBox "PDF æ–‡ä»¶è½¬æ¢ä¸º Base64 å¤±è´¥ã€‚", vbExclamation
         Exit Sub
     End If
     
-    ' µ÷ÓÃ Baidu OCR API
+    ' è°ƒç”¨ Baidu OCR API
     OCRResult = CallBaiduOCR(base64Content)
     If OCRResult = "" Then
-        MsgBox "µ÷ÓÃ Baidu OCR API Ê§°Ü¡£", vbExclamation
+        MsgBox "è°ƒç”¨ Baidu OCR API å¤±è´¥ã€‚", vbExclamation
         Exit Sub
     End If
     
-    ' ´ÓÅäÖÃÎÄ¼şÖĞ»ñÈ¡Ä¿±êÎÄ¼ş¼ĞÂ·¾¶
+    ' ä»é…ç½®æ–‡ä»¶ä¸­è·å–ç›®æ ‡æ–‡ä»¶å¤¹è·¯å¾„
     configPath = Environ("USERPROFILE") & "\OutlookPlugin\DiDiInvoice\config.ini"
     Set iniFile = CreateObject("Scripting.Dictionary")
     ParseINIFile configPath, iniFile
@@ -111,55 +111,55 @@ Sub ProcessMailAndCallOCR()
     If iniFile.Exists("destinationFolder") Then
         destinationFolder = iniFile("destinationFolder")
     Else
-        MsgBox "ÅäÖÃÎÄ¼şÖĞÈ±ÉÙ destinationFolder£¬Çë¼ì²é£º" & vbCrLf & configPath, vbExclamation
+        MsgBox "é…ç½®æ–‡ä»¶ä¸­ç¼ºå°‘ destinationFolderï¼Œè¯·æ£€æŸ¥ï¼š" & vbCrLf & configPath, vbExclamation
         Exit Sub
     End If
     
-    ' ¼ì²éÄ¿±êÎÄ¼ş¼ĞÂ·¾¶ÊÇ·ñ´æÔÚ
+    ' æ£€æŸ¥ç›®æ ‡æ–‡ä»¶å¤¹è·¯å¾„æ˜¯å¦å­˜åœ¨
     If Dir(destinationFolder, vbDirectory) = "" Then
         MkDir destinationFolder
     End If
     
-    ' ´´½¨ log ÎÄ¼ş²¢±£´æ OCR ½á¹û
+    ' åˆ›å»º log æ–‡ä»¶å¹¶ä¿å­˜ OCR ç»“æœ
     logFile = targetFolder & "\" & PR_SEARCH_KEY & ".log"
     Set fileSystem = CreateObject("Scripting.FileSystemObject")
     Dim logFileWriter As Object
     Set logFileWriter = fileSystem.CreateTextFile(logFile, True)
-    logFileWriter.WriteLine "OCR API ·µ»Ø½á¹û:"
+    logFileWriter.WriteLine "OCR API è¿”å›ç»“æœ:"
     logFileWriter.WriteLine OCRResult
     logFileWriter.Close
     
-    ' ¶ÁÈ¡ÈÕÖ¾ÎÄ¼şÄÚÈİ
+    ' è¯»å–æ—¥å¿—æ–‡ä»¶å†…å®¹
     Dim logFileReader As Object
     Set logFileReader = fileSystem.OpenTextFile(logFile, 1)
     logContent = logFileReader.ReadAll
     logFileReader.Close
     
-    ' Ê¹ÓÃÕıÔò±í´ïÊ½ÌáÈ¡¹Ø¼üĞÅÏ¢
+    ' ä½¿ç”¨æ­£åˆ™è¡¨è¾¾å¼æå–å…³é”®ä¿¡æ¯
     Set regExp = CreateObject("VBScript.RegExp")
     regExp.Global = True
     regExp.IgnoreCase = True
     
-    ' ÌáÈ¡ÈÕÆÚ
-    regExp.Pattern = "ĞĞ³ÌÆğÖ¹ÈÕÆÚ£º(\d{4}-\d{2}-\d{2})"
+    ' æå–æ—¥æœŸ
+    regExp.Pattern = "è¡Œç¨‹èµ·æ­¢æ—¥æœŸï¼š(\d{4}-\d{2}-\d{2})"
     Set matches = regExp.Execute(logContent)
     If matches.Count > 0 Then
         startDate = matches(0).SubMatches(0)
     Else
-        startDate = "Î´ÖªÈÕÆÚ"
+        startDate = "æœªçŸ¥æ—¥æœŸ"
     End If
     
-    ' ÌáÈ¡½ğ¶î
-    regExp.Pattern = "ºÏ¼Æ([\d\.]+)Ôª"
+    ' æå–é‡‘é¢
+    regExp.Pattern = "åˆè®¡([\d\.]+)å…ƒ"
     Set matches = regExp.Execute(logContent)
     If matches.Count > 0 Then
         totalAmount = matches(0).SubMatches(0)
     Else
-        totalAmount = "Î´Öª½ğ¶î"
+        totalAmount = "æœªçŸ¥é‡‘é¢"
     End If
     
-    ' ÖØÃüÃûÎÄ¼ş
-    oldFilePaths = Array(targetFolder & "\µÎµÎ³öĞĞĞĞ³Ì±¨Ïúµ¥.pdf", targetFolder & "\µÎµÎµç×Ó·¢Æ±.pdf")
+    ' é‡å‘½åæ–‡ä»¶
+    oldFilePaths = Array(targetFolder & "\æ»´æ»´å‡ºè¡Œè¡Œç¨‹æŠ¥é”€å•.pdf", targetFolder & "\æ»´æ»´ç”µå­å‘ç¥¨.pdf")
     For i = LBound(oldFilePaths) To UBound(oldFilePaths)
         oldFilePath = oldFilePaths(i)
         If Dir(oldFilePath) <> "" Then
@@ -169,7 +169,7 @@ Sub ProcessMailAndCallOCR()
         End If
     Next i
     
-    ' ÒÆ¶¯ÎÄ¼şµ½Ä¿±êÎÄ¼ş¼Ğ
+    ' ç§»åŠ¨æ–‡ä»¶åˆ°ç›®æ ‡æ–‡ä»¶å¤¹
     For i = LBound(oldFilePaths) To UBound(oldFilePaths)
         oldFilePath = oldFilePaths(i)
         If Dir(oldFilePath) <> "" Then
@@ -179,10 +179,10 @@ Sub ProcessMailAndCallOCR()
         End If
     Next i
     
-    ' ´ò¿ªÄ¿±êÎÄ¼ş¼Ğ
-    Shell "explorer.exe " & destinationFolder, vbNormalFocus
+    ' æ‰“å¼€ç›®æ ‡æ–‡ä»¶å¤¹
+    Call OpenOrActivateFolder(destinationFolder)
     
-    ' ÇåÀí¶ÔÏó
+    ' æ¸…ç†å¯¹è±¡
     Set olAttachments = Nothing
     Set olMail = Nothing
     Set olExplorer = Nothing
@@ -195,7 +195,6 @@ End Sub
 
 
 Sub ShowConfigForm()
-    ' ÏÔÊ¾´°Ìå
+    ' æ˜¾ç¤ºçª—ä½“
     ConfigForm.Show
 End Sub
-
