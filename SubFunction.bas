@@ -1,5 +1,10 @@
 Attribute VB_Name = "SubFunction"
-' ½«ÎÄ¼ş×ª»»ÎªBase64
+Declare PtrSafe Function FindWindow Lib "user32" Alias "FindWindowA" _
+    (ByVal lpClassName As String, ByVal lpWindowName As String) As Long
+
+Declare PtrSafe Function SetForegroundWindow Lib "user32" _
+    (ByVal hWnd As Long) As Long
+' å°†æ–‡ä»¶è½¬æ¢ä¸ºBase64
 Function ConvertFileToBase64(filePath As String) As String
     Dim fileStream As Object
     Dim binaryData() As Byte
@@ -7,7 +12,7 @@ Function ConvertFileToBase64(filePath As String) As String
     
     On Error Resume Next
     Set fileStream = CreateObject("ADODB.Stream")
-    fileStream.Type = 1 ' ¶ş½øÖÆ
+    fileStream.Type = 1 ' äºŒè¿›åˆ¶
     fileStream.Open
     fileStream.LoadFromFile filePath
     binaryData = fileStream.Read
@@ -21,7 +26,7 @@ Function ConvertFileToBase64(filePath As String) As String
     
     ConvertFileToBase64 = EncodeBase64(binaryData)
 End Function
-' µ÷ÓÃBaidu OCR API£¨Ö§³Ö´ÓÅäÖÃÎÄ¼ş¼ÓÔØÆ¾¾İ£©
+' è°ƒç”¨Baidu OCR APIï¼ˆæ”¯æŒä»é…ç½®æ–‡ä»¶åŠ è½½å‡­æ®ï¼‰
 Function CallBaiduOCR(base64Content As String) As String
     Dim http As Object
     Dim clientId As String
@@ -35,31 +40,31 @@ Function CallBaiduOCR(base64Content As String) As String
     Dim iniFile As Object
     Dim responseText As String
     
-    ' ÅäÖÃÎÄ¼şÂ·¾¶
+    ' é…ç½®æ–‡ä»¶è·¯å¾„
     configPath = Environ("USERPROFILE") & "\OutlookPlugin\DiDiInvoice\config.ini"
     
-    ' ¼ì²éÅäÖÃÎÄ¼şÊÇ·ñ´æÔÚ
+    ' æ£€æŸ¥é…ç½®æ–‡ä»¶æ˜¯å¦å­˜åœ¨
     If Dir(configPath) = "" Then
-        MsgBox "ÅäÖÃÎÄ¼ş²»´æÔÚ£¬ÇëÈ·±£ÎÄ¼şÂ·¾¶ÕıÈ·£º" & vbCrLf & configPath, vbExclamation
+        MsgBox "é…ç½®æ–‡ä»¶ä¸å­˜åœ¨ï¼Œè¯·ç¡®ä¿æ–‡ä»¶è·¯å¾„æ­£ç¡®ï¼š" & vbCrLf & configPath, vbExclamation
         CallBaiduOCR = ""
         Exit Function
     End If
     
-    ' ¶ÁÈ¡ÅäÖÃÎÄ¼ş
+    ' è¯»å–é…ç½®æ–‡ä»¶
     Set iniFile = CreateObject("Scripting.Dictionary")
     ParseINIFile configPath, iniFile
     
-    ' ´ÓÅäÖÃÎÄ¼şÖĞ»ñÈ¡clientIdºÍclientSecret
+    ' ä»é…ç½®æ–‡ä»¶ä¸­è·å–clientIdå’ŒclientSecret
     If iniFile.Exists("clientId") And iniFile.Exists("clientSecret") Then
         clientId = iniFile("clientId")
         clientSecret = iniFile("clientSecret")
     Else
-        MsgBox "ÅäÖÃÎÄ¼şÖĞÈ±ÉÙclientId»òclientSecret£¬Çë¼ì²é£º" & vbCrLf & configPath, vbExclamation
+        MsgBox "é…ç½®æ–‡ä»¶ä¸­ç¼ºå°‘clientIdæˆ–clientSecretï¼Œè¯·æ£€æŸ¥ï¼š" & vbCrLf & configPath, vbExclamation
         CallBaiduOCR = ""
         Exit Function
     End If
     
-    ' »ñÈ¡ Access Token
+    ' è·å– Access Token
     tokenURL = "https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id=" & clientId & "&client_secret=" & clientSecret
     Set http = CreateObject("MSXML2.XMLHTTP")
     http.Open "POST", tokenURL, False
@@ -67,42 +72,42 @@ Function CallBaiduOCR(base64Content As String) As String
     http.Send
     
     If http.Status <> 200 Then
-        MsgBox "»ñÈ¡ Access Token Ê§°Ü: " & http.Status & " - " & http.statusText, vbExclamation
+        MsgBox "è·å– Access Token å¤±è´¥: " & http.Status & " - " & http.statusText, vbExclamation
         CallBaiduOCR = ""
         Exit Function
     End If
     
-    ' ½âÎö Access Token
+    ' è§£æ Access Token
     Set JSON = JsonConverter.ParseJSON(http.responseText)
     accessToken = JSON("access_token")
     
     ' OCR API URL
     OCRURL = "https://aip.baidubce.com/rest/2.0/ocr/v1/accurate_basic?access_token=" & accessToken
     
-    ' ÇëÇó²ÎÊı
+    ' è¯·æ±‚å‚æ•°
     postData = "pdf_file=" & URLEncode(base64Content) & _
                "&detect_direction=false" & _
                "&paragraph=false" & _
                "&probability=false" & _
                "&multidirectional_recognize=false"
     
-    ' ´´½¨ HTTP ÇëÇó
+    ' åˆ›å»º HTTP è¯·æ±‚
     Set http = CreateObject("MSXML2.XMLHTTP")
     http.Open "POST", OCRURL, False
     http.setRequestHeader "Content-Type", "application/x-www-form-urlencoded"
     http.setRequestHeader "Accept", "application/json"
     http.Send postData
     
-    ' ¼ì²éÏìÓ¦×´Ì¬
+    ' æ£€æŸ¥å“åº”çŠ¶æ€
     If http.Status = 200 Then
         CallBaiduOCR = http.responseText
     Else
-        MsgBox "OCR ÇëÇóÊ§°Ü: " & http.Status & " - " & http.statusText, vbExclamation
+        MsgBox "OCR è¯·æ±‚å¤±è´¥: " & http.Status & " - " & http.statusText, vbExclamation
         CallBaiduOCR = ""
     End If
 End Function
 
-' ½âÎöINIÎÄ¼şÎª¼üÖµ¶Ô
+' è§£æINIæ–‡ä»¶ä¸ºé”®å€¼å¯¹
 Sub ParseINIFile(filePath As String, ByRef iniDict As Object)
     Dim stream As Object
     Dim fileContent As String
@@ -110,17 +115,17 @@ Sub ParseINIFile(filePath As String, ByRef iniDict As Object)
     Dim line As Variant
     Dim keyValue() As String
 
-    ' Ê¹ÓÃ ADODB.Stream ¶ÁÈ¡ÅäÖÃÎÄ¼ş
+    ' ä½¿ç”¨ ADODB.Stream è¯»å–é…ç½®æ–‡ä»¶
     Set stream = CreateObject("ADODB.Stream")
-    stream.Type = 2 ' ÎÄ±¾ÀàĞÍ
-    stream.charSet = "utf-8" ' Ö¸¶¨±àÂëÎª UTF-8
+    stream.Type = 2 ' æ–‡æœ¬ç±»å‹
+    stream.charSet = "utf-8" ' æŒ‡å®šç¼–ç ä¸º UTF-8
     stream.Open
     stream.LoadFromFile filePath
     fileContent = stream.ReadText
     stream.Close
     Set stream = Nothing
 
-    ' °´ĞĞ½âÎöÄÚÈİ
+    ' æŒ‰è¡Œè§£æå†…å®¹
     lines = Split(fileContent, vbCrLf)
     For Each line In lines
         If InStr(line, "=") > 0 Then
@@ -133,7 +138,7 @@ End Sub
 
 
 
-' URL ±àÂëº¯Êı£¨±£³Ö²»±ä£©
+' URL ç¼–ç å‡½æ•°ï¼ˆä¿æŒä¸å˜ï¼‰
 Function URLEncode(text As String) As String
     Dim i As Long
     Dim char As String
@@ -142,7 +147,7 @@ Function URLEncode(text As String) As String
     For i = 1 To Len(text)
         char = Mid(text, i, 1)
         Select Case Asc(char)
-            Case 48 To 57, 65 To 90, 97 To 122 ' ×ÖÄ¸ºÍÊı×Ö
+            Case 48 To 57, 65 To 90, 97 To 122 ' å­—æ¯å’Œæ•°å­—
                 encoded = encoded & char
             Case Else
                 encoded = encoded & "%" & Right("0" & Hex(Asc(char)), 2)
@@ -152,7 +157,7 @@ Function URLEncode(text As String) As String
     URLEncode = encoded
 End Function
 
-' ¶ş½øÖÆÊı¾İ±àÂëÎªBase64
+' äºŒè¿›åˆ¶æ•°æ®ç¼–ç ä¸ºBase64
 Function EncodeBase64(binaryData() As Byte) As String
     Dim xmlDoc As Object
     Dim xmlNode As Object
@@ -164,3 +169,29 @@ Function EncodeBase64(binaryData() As Byte) As String
     EncodeBase64 = xmlNode.text
 End Function
 
+
+
+Sub OpenOrActivateFolder(destinationFolder As String)
+    Dim folderPath As String
+    Dim hWnd As Long
+    Dim folderName As String
+
+    ' è·å–æ–‡ä»¶å¤¹åç§°
+    folderPath = Replace(destinationFolder, "/", "\") ' ç¡®ä¿è·¯å¾„ä¸ºåæ–œæ 
+    If Right(folderPath, 1) = "\" Then
+        folderName = Mid(folderPath, InStrRev(folderPath, "\", Len(folderPath) - 1) + 1)
+    Else
+        folderName = Mid(folderPath, InStrRev(folderPath, "\") + 1)
+    End If
+
+    ' æ£€æŸ¥æ–‡ä»¶å¤¹çª—å£æ˜¯å¦å·²ç»æ‰“å¼€
+    hWnd = FindWindow("CabinetWClass", folderName)
+
+    If hWnd <> 0 Then
+        ' å¦‚æœçª—å£å·²ç»æ‰“å¼€ï¼Œå°†å…¶æ¿€æ´»åˆ°å‰å°
+        SetForegroundWindow hWnd
+    Else
+        ' å¦‚æœçª—å£æœªæ‰“å¼€ï¼Œåˆ™æ–°å»ºçª—å£æ‰“å¼€æ–‡ä»¶å¤¹
+        Shell "explorer.exe " & folderPath, vbNormalFocus
+    End If
+End Sub
